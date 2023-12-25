@@ -8,6 +8,10 @@ class Camera;
 // A class declaration to represent vector of 4 dimensions
 class Vec4;
 
+// A class declaration to represent vector of 3 dimensions
+class Vec3;
+
+
 // A ray
 class Ray;
 }; // namespace LRay
@@ -33,3 +37,10 @@ int main() {
   LRay::Camera camera_0 = LRay::Camera();
   camera_0.render();
 }
+
+//Vec3
+class LRay::Vec3{
+  float x;
+  float y;
+  float z;
+};
