@@ -11,7 +11,6 @@ class Vec4;
 // A class declaration to represent vector of 3 dimensions
 class Vec3;
 
-
 // A ray
 class Ray;
 }; // namespace LRay
@@ -38,9 +37,18 @@ int main() {
   camera_0.render();
 }
 
-//Vec3
-class LRay::Vec3{
-  float x;
+// Vec4
+class LRay::Vec4 {
+protected:  float x;
   float y;
   float z;
+  float w;
+
+public:
+LRay::Vec4 &add(LRay::Vec4 b);
+LRay::Vec4 &minus(LRay::Vec4 b);
+};
+
+class LRay::Vec3 :public LRay::Vec4{
+
 };
