@@ -14,6 +14,23 @@ class Vec3;
 // A ray
 class Ray;
 }; // namespace LRay
+// Vec4
+class LRay::Vec4 {
+protected:
+  float x;
+  float y;
+  float z;
+  float w;
+
+public:
+LRay::Vec4(float x, float y, float z, float w=0);
+LRay::Vec4 &add(LRay::Vec4 &b);
+LRay::Vec4 &minus(LRay::Vec4 &b);
+};
+
+class LRay::Vec3 :public LRay::Vec4{
+
+};
 
 class LRay::_3DObject {};
 
@@ -37,18 +54,3 @@ int main() {
   camera_0.render();
 }
 
-// Vec4
-class LRay::Vec4 {
-protected:  float x;
-  float y;
-  float z;
-  float w;
-
-public:
-LRay::Vec4 &add(LRay::Vec4 b);
-LRay::Vec4 &minus(LRay::Vec4 b);
-};
-
-class LRay::Vec3 :public LRay::Vec4{
-
-};
