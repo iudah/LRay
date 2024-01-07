@@ -26,28 +26,41 @@ protected:
 public:
   // create a 4d vector i.e. A =(x,y,z,w)
   Vec4(float x = 0, float y = 0, float z = 0, float w = 0);
+
   // create a copy of a 4d vector i.e. B = A
   Vec4(Vec4 &vec4);
+  
   // Add two vectors i.e. C = A + B => C_x = A_x + B_x; C_y = A_y + B_y ...
   LRay::Vec4 add(LRay::Vec4 &b);
+  
   // Minus two vectors i.e. C = A - B => C_x = A_x - B_x; C_y = A_y - B_y ...
+  
   LRay::Vec4 minus(LRay::Vec4 &b);
+  
   // Multiply two vectors i.e. C = A * B => C_x = A_x * B_x; C_y = A_y * B_y ...
   LRay::Vec4 times(LRay::Vec4 &b);
+  
   // Multiply vector by scalar s i.e. C = A * s
+  
   // => C_x = A_x * s; C_y = A_y * s...
   LRay::Vec4 times(float s);
+  
   // Dot product of two vectors
   float dot(LRay::Vec4 &b);
+  
   // Angle btwn two vectors
   float angle(LRay::Vec4 &b);
+  
   // magnitude of vector
   float mag();
+  
   // compute the unit vector
   LRay::Vec4 unit();
+  
   // Divide vector by scalar s i.e. C = A / s
   // => C_x = A_x / s; C_y = A_y / s...
   LRay::Vec4 divide(float s);
+  
   // override division sign to divide by scalar
   LRay::Vec4 operator/(float s);
 };
