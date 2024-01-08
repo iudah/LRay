@@ -52,8 +52,8 @@ public:
   
   // Angle btwn two vectors
   float angle(LRay::Vec4 &b){
-
-    acos(this->dot(b)/this->mag() * b.mag());
+    float result = acos(this->dot(b)/this->mag() * b.mag());
+    return result;
   };
   
   // magnitude of vector
