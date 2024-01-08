@@ -1,3 +1,5 @@
+#include <math.h>
+
 namespace LRay {
 // A class declaration representing 3d object
 class _3DObject;
@@ -49,7 +51,10 @@ public:
   float dot(LRay::Vec4 &b);
   
   // Angle btwn two vectors
-  float angle(LRay::Vec4 &b);
+  float angle(LRay::Vec4 &b){
+
+    acos(this->dot(b)/this->mag() * b.mag());
+  };
   
   // magnitude of vector
   float mag();
