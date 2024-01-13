@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 
 namespace LRay {
 // A class declaration representing 3d object
@@ -36,7 +36,6 @@ public:
   LRay::Vec4 add(LRay::Vec4 &b);
   
   // Minus two vectors i.e. C = A - B => C_x = A_x - B_x; C_y = A_y - B_y ...
-  
   LRay::Vec4 minus(LRay::Vec4 &b);
   
   // Multiply two vectors i.e. C = A * B => C_x = A_x * B_x; C_y = A_y * B_y ...
@@ -52,7 +51,7 @@ public:
   
   // Angle btwn two vectors
   float angle(LRay::Vec4 &b){
-    float result = acos(this->dot(b)/this->mag() * b.mag());
+    float result = acos(this->dot(b)/(this->mag() * b.mag()));
     return result;
   };
   
@@ -75,7 +74,13 @@ LRay::Vec4::Vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 LRay::Vec4 LRay::Vec4::add(LRay::Vec4 &b) {
   return LRay::Vec4(this->x + b.x, this->y + b.y, this->z + b.z, this->w + b.w);
 }
-
+LRay::Vec4 LRay:: Vec4::minus(LRay::Vec4 &b){
+  float x = this -> x - b.x;
+  float y = this -> y - b.y;
+  float z = this -> z - b.z;
+  float w = this -> w - b.w;
+  return LRay::Vec4(x,y,z,w);
+}
 LRay::Vec4 LRay::Vec4::unit() { return (*this) / this->mag(); }
 
 class LRay::Vec3 : public LRay::Vec4 {
