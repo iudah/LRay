@@ -27,4 +27,9 @@ float Vec4::angle(const Vec4 &b) const {
     return (x*b.x + y*b.y + z*b.z + w*b.w);
   }
 
+
+// magnitude of vector
+  float Vec4::mag() const{
+    return sqrt(dot(*this));
+  }
 } // namespace LRay
