@@ -1,7 +1,9 @@
 #ifndef VEC4_HPP
 #define VEC4_HPP
 
+#include <ostream>
 namespace LRay {
+
 // A class declaration to represent vector of 4 dimensions
 // Vec4
 class Vec4 {
@@ -34,6 +36,7 @@ public:
   // override division sign to divide by scalar
   LRay::Vec4 operator/(const float s) const;
   LRay::Vec4 operator+(const Vec4 b) const;
+  LRay::Vec4 operator-(const Vec4 b) const;
 
   // Dot product of two vectors
   float dot(const LRay::Vec4 &b) const;
@@ -49,8 +52,18 @@ public:
 
   // Divide vector by scalar s i.e. C = A / s
   // => C_x = A_x / s; C_y = A_y / s...
-  LRay::Vec4 divide(const float s) const;
+  LRay::Vec4 divide_by(const float s) const;
+
+  // to string
+  friend std::ostream &operator<<(std::ostream &os, const LRay::Vec4 &vec4);
+
+  float get_x() const { return x; }
+  float get_y() const { return y; }
+  float get_z() const { return z; }
+  float get_w() const { return w; }
 };
+
+std::ostream &operator<<(std::ostream &os, const LRay::Vec4 &vec4);
 
 } // namespace LRay
 #endif
