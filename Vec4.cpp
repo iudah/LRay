@@ -36,14 +36,6 @@ namespace LRay {
         return result;
     }
 
-
-    // Dot product of two vectors
-    float Vec4::dot(const Vec4 &b) const {
-        return (x*b.x + y*b.y + z*b.z + w*b.w);
-    }
-
-
-
     float Vec4::mag() const {
         return std::sqrt(x * x + y * y + z * z + w * w);
     }
@@ -52,6 +44,7 @@ namespace LRay {
         return (*this).divide_by(s);
     }
 
+    // Dot product of two vectors
     float Vec4::dot(const Vec4 &b) const {
         return x * b.x + y * b.y + z * b.z + w * b.w;
     }
