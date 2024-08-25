@@ -1,14 +1,16 @@
 #include <cmath>
 #include <cstddef>
+#include <cstdio>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <utility>
 #include <vector>
 
-#include "Vec4.hpp"
+#include "vector/Vec4.hpp"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "stb_image/stb_image_write.h"
 
 namespace LRay {
 // A class declaration representing 3d object
@@ -118,8 +120,8 @@ int LRay::Camera::render() const {
 
   unsigned char *current_color = image_data;
 
-    for (int y = y_bound[0]; y < y_bound[1]; y++) {
-  for (int x = x_bound[0]; x < x_bound[1]; x++) {
+  for (int y = y_bound[0]; y < y_bound[1]; y++) {
+    for (int x = x_bound[0]; x < x_bound[1]; x++) {
       LRay::Ray camera_ray = make_camera_ray(x, y);
 
       std::cout << "Camera ray: " << camera_ray << " ";
@@ -135,8 +137,11 @@ int LRay::Camera::render() const {
     }
   }
 
-
-  stbi_write_jpg("./camera_test.jpg", width, height, 3, image_data, 100);
+  char *base_dir = std::getenv("LRAY_IMAGE_DIR"); // std::getenv("TMP");
+  char file_name[255];
+  snprintf(file_name, sizeof(file_name), "%s%s", base_dir ? base_dir : ".",
+           "/camera.jpg");
+  stbi_write_jpg(file_name, width, height, 3, image_data, 100);
 
   return 0;
 }
