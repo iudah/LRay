@@ -1,0 +1,9 @@
+set(HEADER_FILES
+    src/stb_image/stb_image_write.h
+    src/renderer/ray.h
+    src/renderer/scene.h
+    src/renderer/object.h
+    src/renderer/camera.h
+    src/math
+    src/math/vec4.h
+)
