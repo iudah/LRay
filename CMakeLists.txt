@@ -11,53 +11,72 @@ set(C_WARNINGS "-Wall -Wextra -Wshadow -Wformat=2 -Wunused")
 include(ExternalProject)
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/memalloc/lib/cmake/memalloc")
-find_package(memalloc QUIET)
-if(NOT memalloc_FOUND)
-    ExternalProject_Add(
-        Memalloc
-        SOURCE_DIR /sdcard/Jay/Projects/xab_laud_ubject/memalloc/
-        INSTALL_DIR ${CMAKE_BINARY_DIR}/memalloc
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-        BUILD_ALWAYS OFF
-        STAMP_DIR ${CMAKE_BINARY_DIR}/stamps
-    )
-endif()
 
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/zot/lib/cmake/zot")
-find_package(zot QUIET)
-if(NOT zot_FOUND)
-    ExternalProject_Add(
-        Zot
-        SOURCE_DIR /sdcard/Jay/Projects/xab_laud_ubject/zot/
-        INSTALL_DIR ${CMAKE_BINARY_DIR}/zot
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
-        BUILD_ALWAYS OFF
-        STAMP_DIR ${CMAKE_BINARY_DIR}/stamps
-    )
-    if(NOT memalloc_FOUND)
-        add_dependencies(Zot Memalloc)
-    endif()
+find_package(memalloc QUIET)
+add_library(memalloc_imported STATIC IMPORTED)
+if(NOT TARGET memalloc::memalloc)
+  message(STATUS "memalloc not found, adding as ExternalProject")
+  ExternalProject_Add(
+    MemAlloc
+    GIT_REPOSITORY "https://github.com/iudah/memalloc.git"
+    GIT_TAG origin/master
+    GIT_SHALLOW TRUE
+    INSTALL_DIR ${CMAKE_BINARY_DIR}/memalloc
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_EXECUTABLE=OFF
+    BUILD_ALWAYS OFF
+    STAMP_DIR ${CMAKE_BINARY_DIR}/stamps
+    UPDATE_DISCONNECTED TRUE
+    BUILD_BYPRODUCTS "${CMAKE_BINARY_DIR}/memalloc/lib/${CMAKE_STATIC_LIBRARY_PREFIX}memalloc${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  )
+
+  file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/memalloc/include")
+
+  add_dependencies(memalloc_imported MemAlloc)
+  add_library(memalloc::memalloc ALIAS memalloc_imported)
 endif()
+set_target_properties(memalloc_imported PROPERTIES
+  IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/memalloc/lib/${CMAKE_STATIC_LIBRARY_PREFIX}memalloc${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/memalloc/include"
+)
+
+find_package(zot QUIET)
+add_library(zot_imported STATIC IMPORTED)
+if(NOT TARGET zot::zot)
+  message(STATUS "zot not found, adding as ExternalProject")
+  ExternalProject_Add(
+    zot
+    GIT_REPOSITORY "https://github.com/iudah/zot.git"
+    GIT_TAG origin/main
+    GIT_SHALLOW TRUE
+    INSTALL_DIR ${CMAKE_BINARY_DIR}/zot
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_EXECUTABLE=OFF
+    BUILD_ALWAYS OFF
+    STAMP_DIR ${CMAKE_BINARY_DIR}/stamps
+    UPDATE_DISCONNECTED TRUE
+    BUILD_BYPRODUCTS "${CMAKE_BINARY_DIR}/zot/lib/${CMAKE_STATIC_LIBRARY_PREFIX}zot${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  )
+
+  file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/zot/include")
+
+  add_dependencies(zot_imported zot MemAlloc)
+  add_library(zot::zot ALIAS zot_imported)
+endif()
+set_target_properties(zot_imported PROPERTIES
+  IMPORTED_LOCATION "${CMAKE_BINARY_DIR}/zot/lib/${CMAKE_STATIC_LIBRARY_PREFIX}zot${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/zot/include"
+)
 
 add_library(lray STATIC)
 include(sources.cmake)
 include(headers.cmake)
 target_sources(lray PRIVATE ${SOURCE_FILES})
-if(NOT zot_FOUND)
-    add_dependencies(lray Zot)
-endif()
-target_include_directories(lray PUBLIC src src/renderer ${CMAKE_BINARY_DIR}/zot/include)
+
+target_include_directories(lray PUBLIC src/math src/renderer src/stb_image ${CMAKE_BINARY_DIR}/zot/include)
 
 add_executable(lray_exe main.c)
-target_link_libraries(lray_exe PUBLIC memalloc zot lray)
-if(NOT memalloc_FOUND)
-    target_link_directories(lray_exe PRIVATE ${CMAKE_BINARY_DIR}/memalloc/lib)
-    add_dependencies(lray_exe Memalloc)
-endif()
-if(NOT zot_FOUND)
-    target_link_directories(lray_exe PRIVATE ${CMAKE_BINARY_DIR}/zot/lib)
-    add_dependencies(lray_exe Zot)
-endif()
+target_link_libraries(lray_exe PUBLIC memalloc::memalloc zot::zot lray)
+
+
 add_dependencies(lray_exe lray)
 
 

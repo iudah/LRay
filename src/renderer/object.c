@@ -1,10 +1,13 @@
 #include "object.h"
 #include "ray.repr.h"
 #include <math.h>
+#include <stdint.h>
 #include <zot.h>
 
 struct object {
   bool (*intersect_fn)(ray *ray, object *sphere);
+  vec4 *(*hit_normal)(vec4 *v, object *hit_object, ray *primary_ray,
+                      vec4 *hit_point);
   vec4 *color;
 };
 
@@ -63,9 +66,17 @@ bool intersect_sphere(struct ray *ray, object *object) {
   return false;
 }
 
+vec4 *get_sphere_hit_normal(vec4 *vres, object *hit_object, ray *primary_ray,
+                            vec4 *hit_point) {
+  struct sphere *sphere = (void *)hit_object;
+
+  return vnorm(vres, vsub(NULL, hit_point, sphere->center));
+}
+
 object *make_sphere(object *object, float radius, vec4 *center, vec4 *color) {
   struct sphere *sphere = object ? object : zcalloc(1, sizeof(struct sphere));
   sphere->object.intersect_fn = (void *)intersect_sphere;
+  sphere->object.hit_normal = (void *)get_sphere_hit_normal;
   sphere->object.color = color;
   sphere->center = center;
   sphere->radius = radius;
@@ -81,7 +92,12 @@ bool intersect_object(ray *ray, object *object) {
 
 vec4 *trace_color(vec4 *color, ray *ray, object *object) {
   // auto hit_point = vscale(NULL, ray->distance, ray->direction);
-  make_vec4(color, (float *)object->color);
+  color = make_vec4(color, (float *)object->color);
   printf(".");
   return color;
+}
+
+vec4 *get_object_hit_normal(vec4 *v, object *hit_object, ray *primary_ray,
+                            vec4 *hit_point) {
+  return hit_object->hit_normal(v, hit_object, primary_ray, hit_point);
 }

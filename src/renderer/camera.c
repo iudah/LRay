@@ -1,6 +1,6 @@
 
 #include "camera.h"
-#include "math/vec4.h"
+#include "vec4.h"
 #include "ray.h"
 #include "scene.h"
 #include <math.h>
@@ -8,7 +8,7 @@
 #include <zot.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION 1
-#include "stb_image/stb_image_write.h"
+#include "stb_image_write.h"
 
 typedef enum { m, cm, mm } world_unit;
 struct camera {
@@ -74,7 +74,7 @@ bool render(camera *cam, scene *scene) {
     }
   }
 
-  stbi_write_jpg("/mnt/sdcard/Jay/Projects/LRay/img7.jpg", cam->width,
+  stbi_write_jpg("/mnt/sdcard/Jay/lray/img7.jpg", cam->width,
                  cam->height, 3, image, 100);
 
   return true;

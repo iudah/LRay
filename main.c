@@ -1,4 +1,5 @@
 #include "camera.h"
+#include "light.h"
 #include "object.h"
 #include "scene.h"
 #include <stdio.h>
@@ -14,17 +15,20 @@ int main() {
   for (int i = 0; i < 5; i++) {
     object *sphere = make_sphere(
         nullptr, .21,
-        make_vec4(nullptr, (float[]){1, 2 - 4 * (random() / (float)RAND_MAX),
-                                     5 - 10 * (random() / (float)RAND_MAX), 1}),
-        // make_vec4(nullptr, (float[]){0, 1, 1, 1}),
-        make_vec4(nullptr, (float[]){1, 0, random() / (float)RAND_MAX, 1}));
+        make_vec4(nullptr,
+                  (float[]){-5. / 2 + i + .42, -5. / 2 + i + .42, 0, 1}),
+        make_vec4(nullptr, (float[]){1, (random() / (float)RAND_MAX),
+                                     (random() / (float)RAND_MAX), 1}));
     scene_add_object(scene, sphere);
-  }
+   
+    light *light =
+        make_light(nullptr, POINT_LIGHT, 5,
+                   make_vec4(nullptr, (float[]){-5. / 2 + i + .42,
+                                                -5. / 2 + i + .42, .50, 1}),
+                   make_vec4(nullptr, (float[]){1, 1, 1, 1}));
+   scene_add_light(scene, light);
+ }
 
-  object *sphere =
-      make_sphere(nullptr, .51, make_vec4(nullptr, (float[]){0, 0, 0, 1}),
-                  make_vec4(nullptr, (float[]){.7, .7, .7, 1}));
-  scene_add_object(scene, sphere);
 
   render(camera, scene);
 
