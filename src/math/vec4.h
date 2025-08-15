@@ -1,7 +1,7 @@
 #ifndef VEC4_H
 #define VEC4_H
 
-#define EPSILON (1e-4f)
+#define EPSILON (1e-7f)
 
 typedef struct v4 vec4;
 typedef struct m4 mat4;
@@ -12,6 +12,7 @@ vec4 *vsub(vec4 *vres, vec4 *va, vec4 *vb);
 vec4 *vmul(vec4 *vres, vec4 *va, vec4 *vb);
 vec4 *vscale(vec4 *vres, float s, vec4 *vb);
 float vdot(float *fres, vec4 *va, vec4 *vb);
+vec4 *vcross(vec4 *vres, vec4 *va, vec4 *vb);
 vec4 *vnorm(vec4 *res, vec4 *v);
 float vmag(float *fres, vec4 *va);
 
@@ -27,5 +28,8 @@ vec4 *mv3dot(vec4 *vres, mat4 *m, vec4 *v);
 vec4 *mvdot(vec4 *vres, mat4 *m, vec4 *v);
 mat4 *mdot(mat4 *mres, mat4 *a, mat4 *b);
 mat4 *minv(mat4 *mres, mat4 *M);
+
+bool compute_moller_trumbore_unknowns(vec4 *D, vec4 *AB, vec4 *AC, vec4 *AO, float *det, float *t, float *u,
+                   float *v);
 
 #endif

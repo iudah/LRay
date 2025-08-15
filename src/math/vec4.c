@@ -675,3 +675,66 @@ mat4 *mrotate_z(mat4 *mres, float angle) {
   };
   return mdot(mres, mres, &rot);
 }
+
+bool compute_moller_trumbore_unknowns(vec4 *D, vec4 *AB, vec4 *AC, vec4 *AO,
+                                      float *det, float *t, float *u,
+                                      float *v) {
+
+  // # As at the time of wrtiting
+  // #pip install sympy==1.14.0
+
+  // from sympy import Matrix, symbols
+
+  // a,b,c,d,e,f,g,h,i,x,y,z = symbols("a b c d e f g h i x y z")
+
+  // M = Matrix([[a,b,c,x], [d, e, f, y],[g,h,i,z]])
+
+  // for i in range(0, 3):
+  //     M[i,:]/=M[i,i]
+  //     for j in range(i+1, i+3):
+  //         j%=3
+  //         M[j,:] -= M[j,i]*M[i,:]
+  //     print(M)
+
+  // M.simplify()
+  // print(M)
+
+  // '''
+  // Result:
+  // (b*f*z - b*i*y - c*e*z + c*h*y + e*i*x - f*h*x)/(a*e*i - a*f*h - b*d*i +
+  // b*f*g + c*d*h - c*e*g)
+  // -(a*f*z - a*i*y - c*d*z + c*g*y + d*i*x - f*g*x)/(a*e*i - a*f*h - b*d*i +
+  // b*f*g + c*d*h - c*e*g) (a*e*z - a*h*y - b*d*z + b*g*y + d*h*x -
+  // e*g*x)/(a*e*i - a*f*h - b*d*i + b*f*g + c*d*h - c*e*g)
+  // '''
+
+  if (!(t && u && v))
+    return false;
+
+  float a = -D->x;
+  float b = AB->x;
+  float c = AC->x;
+  float x = AO->x;
+
+  float d = -D->y;
+  float e = AB->y;
+  float f = AC->y;
+  float y = AO->y;
+
+  float g = -D->z;
+  float h = AB->z;
+  float i = AC->z;
+  float z = AO->z;
+
+  *det =
+      (a * e * i - a * f * h - b * d * i + b * f * g + c * d * h - c * e * g);
+  *t = (b * f * z - b * i * y - c * e * z + c * h * y + e * i * x - f * h * x) /
+       *det;
+  *u =
+      -(a * f * z - a * i * y - c * d * z + c * g * y + d * i * x - f * g * x) /
+      *det;
+  *v = (a * e * z - a * h * y - b * d * z + b * g * y + d * h * x - e * g * x) /
+       *det;
+
+  return true;
+}

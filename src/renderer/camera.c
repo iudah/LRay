@@ -1,8 +1,8 @@
 
 #include "camera.h"
-#include "vec4.h"
 #include "ray.h"
 #include "scene.h"
+#include "vec4.h"
 #include <math.h>
 #include <stdlib.h>
 #include <zot.h>
@@ -60,68 +60,33 @@ ray *make_primary_ray(ray *ray, camera *cam, int x, int y) {
 
 #if 1
 bool render(camera *cam, scene *scene) {
-  char *image = zcalloc(cam->height * cam->width * 3, sizeof(char));
+  uint8_t *image = zcalloc(cam->height * cam->width * 3, sizeof(char));
   for (int y = 0; y < cam->height; y++) {
     for (int x = 0; x < cam->width; x++) {
-      ray *primary = make_primary_ray(NULL, cam, x, y);
-      vec4 *color = make_vec4(NULL, (float[]){0, 0, 0, 1});
 
-      scan_pixel(color, scene, primary);
-      char *pix = &image[(y * cam->width + x) * 3];
-      pix[0] = (char)(255 * ((float *)color)[0]);
-      pix[1] = (char)(255 * ((float *)color)[1]);
-      pix[2] = (char)(255 * ((float *)color)[2]);
+      uint8_t *pix = &image[(y * cam->width + x) * 3];
+
+      // for (int j = 0; j < 2; j++)
+      {
+        float j = 0;
+        ray *primary = make_primary_ray(NULL, cam, x + j / 2.f, y + j / 2.f);
+        vec4 *color = make_vec4(NULL, (float[]){0, 0, 0, 1});
+
+        scan_pixel(color, scene, primary);
+
+#define CLAMP(x) ((x) < 0 ? 0 : (x) > 1 ? 1 : (x))
+
+        pix[0] += (uint8_t)(255 * CLAMP(((float *)color)[0])) ;
+        pix[1] += (uint8_t)(255 * CLAMP(((float *)color)[1])) ;
+        pix[2] += (uint8_t)(255 * CLAMP(((float *)color)[2])) ;
+      }
     }
   }
 
-  stbi_write_jpg("/mnt/sdcard/Jay/lray/img7.jpg", cam->width,
-                 cam->height, 3, image, 100);
+  stbi_write_jpg("/mnt/sdcard/Jay/lray/img7.jpg", cam->width, cam->height, 3,
+                 image, 100);
 
   return true;
-}
-#else
-#include "ray.repr.h"
-struct v4 {
-  float x, y, z, w;
-};
-
-bool render(camera *cam, scene *scene) {
-  unsigned char *image = calloc(cam->width * cam->height * 3, 1);
-  for (int y = 0; y < cam->height; y++) {
-    for (int x = 0; x < cam->width; x++) {
-      int idx = (y * cam->width + x) * 3;
-      // light gray background
-      image[idx + 0] = image[idx + 1] = image[idx + 2] = 200;
-
-      ray *primary = make_primary_ray(NULL, cam, x, y);
-      vec4 color = {0, 0, 0, 1};
-
-      // debug: log first few rays
-      if (x < 3 && y < 3) {
-        printf("ray[%d,%d] dir = %f %f %f\n", x, y,
-               ((float *)primary->direction)[0],
-               ((float *)primary->direction)[1],
-               ((float *)primary->direction)[2]);
-        fflush(stdout);
-      }
-      scan_pixel(&color, scene, primary);
-      if (primary->distance < INFINITY) {
-        printf("hit pixel (%d,%d)\n", x, y);
-        fflush(stdout);
-      }
-      // free(primary);
-      // write color into image
-      image[idx + 0] = (unsigned char)(255 * color.x);
-      image[idx + 1] = (unsigned char)(255 * color.y);
-      image[idx + 2] = (unsigned char)(255 * color.z);
-    }
-  }
-
-  int ok = stbi_write_jpg("img7.jpg", cam->width, cam->height, 3, image, 100);
-  printf("wrote img7.jpg? %d\n", ok);
-  fflush(stdout);
-  free(image);
-  return ok;
 }
 #endif
 

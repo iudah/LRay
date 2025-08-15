@@ -42,11 +42,11 @@ ray *make_secondary_ray(ray *ray_res, ray *primary_ray, light *light,
                                  hit_normal);
 }
 
-vec4 *light_contribution(vec4 *color, ray *light_ray, light *light,
+vec4 *light_contribution(vec4 *color, ray *shadow_ray, light *light,
                          vec4 *hit_normal) {
-  float light_factor = fmaxf(0, vdot(NULL, light_ray->direction, hit_normal));
-  float r =light_ray->distance;// vmag(NULL, vsub(NULL, light_ray->origin, light->center));
-// light->brightness
+  float light_factor = fmaxf(0, vdot(NULL, shadow_ray->direction, hit_normal));
+  float r2 = shadow_ray->distance * shadow_ray->distance;
+  // light->brightness
 
-  return vscale(color,  light_factor / r / r, light->color);
+  return vscale(color, light->brightness * light_factor / r2, light->color);
 }

@@ -20,15 +20,28 @@ int main() {
         make_vec4(nullptr, (float[]){1, (random() / (float)RAND_MAX),
                                      (random() / (float)RAND_MAX), 1}));
     scene_add_object(scene, sphere);
-   
-    light *light =
-        make_light(nullptr, POINT_LIGHT, 5,
-                   make_vec4(nullptr, (float[]){-5. / 2 + i + .42,
-                                                -5. / 2 + i + .42, .50, 1}),
-                   make_vec4(nullptr, (float[]){1, 1, 1, 1}));
-   scene_add_light(scene, light);
- }
 
+    light *light =
+        make_light(nullptr, POINT_LIGHT, .1*i,
+                   make_vec4(nullptr, (float[]){-5. / 2 + i + .42,
+                                                -5. / 2 + i + .42,  .50, 1}),
+                   make_vec4(nullptr, (float[]){1, 1, 1, 1}));
+    scene_add_light(scene, light);
+  }
+
+  object *triangle =
+      make_triangle(nullptr, make_vec4(nullptr, (float[]){1.7, 1.7, 0, 1}),
+                    make_vec4(nullptr, (float[]){.1, .8, .0, 1}),
+                    make_vec4(nullptr, (float[]){1.8, .3, .0, 1}),
+                    make_vec4(nullptr, (float[]){1, 0, 0, 1}));
+  scene_add_object(scene, triangle);
+
+  triangle =
+      make_triangle(nullptr, make_vec4(nullptr, (float[]){1.5, 1.5, 0, 1}),
+                    make_vec4(nullptr, (float[]){.5, .6, .3, 1}),
+                    make_vec4(nullptr, (float[]){1.5, .5, .5, 1}),
+                    make_vec4(nullptr, (float[]){0, 1, 0, 1}));
+  scene_add_object(scene, triangle);
 
   render(camera, scene);
 

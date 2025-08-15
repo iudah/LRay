@@ -14,7 +14,7 @@ light *make_light(light *light, uint8_t type, float brightness, vec4 *center,
                   vec4 *color);
 ray *make_secondary_ray(ray *ray_res, ray *primary_ray, light *light,
                               vec4 *hit_point, vec4 *hit_normal);
-vec4 *light_contribution(vec4 *color, ray *light_ray, light *light,
+vec4 *light_contribution(vec4 *color, ray *shadow_ray, light *light,
                          vec4 *hit_normal);
 
 #endif

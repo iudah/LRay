@@ -11,5 +11,6 @@ object *make_sphere(object *object, float radius, vec4 *center, vec4 *color);
 bool intersect_object(ray *ray, object *object);
 vec4 *get_object_hit_normal(vec4 *v, object *hit_object, ray *primary_ray,
                             vec4 *hit_point);
+object *make_triangle(object *object, vec4 *A, vec4 *B, vec4 *C, vec4 *color) ;
 
 #endif
