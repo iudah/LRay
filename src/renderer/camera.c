@@ -40,10 +40,10 @@ camera *make_camera(camera *cam, int image_width, int image_height, float AOV) {
   return cam;
 }
 
-ray *make_primary_ray(ray *ray, camera *cam, int x, int y) {
+ray *make_primary_ray(ray *ray, camera *cam, float x, float y) {
 
-  float NDC_x = (x + 0.5f) / cam->width;
-  float NDC_y = (y + 0.5f) / cam->height;
+  float NDC_x = (x) / cam->width;
+  float NDC_y = (y) / cam->height;
   float cam_x = (2.f * NDC_x - 1.f) * cam->FOV * cam->aspect_ratio_x;
   float cam_y = (1.f - 2.f * NDC_y) * cam->FOV; //* cam->aspect_ratio_y;
 
@@ -61,25 +61,35 @@ ray *make_primary_ray(ray *ray, camera *cam, int x, int y) {
 #if 1
 bool render(camera *cam, scene *scene) {
   uint8_t *image = zcalloc(cam->height * cam->width * 3, sizeof(char));
-  for (int y = 0; y < cam->height; y++) {
-    for (int x = 0; x < cam->width; x++) {
+  uint8_t n_samples = 8;
+  uint8_t j_max = (uint8_t)sqrtf(n_samples);
+  uint8_t k_max = n_samples / j_max;
+
+  for (int y = 0; y < cam->height; ++y) {
+    for (int x = 0; x < cam->width; ++x) {
 
       uint8_t *pix = &image[(y * cam->width + x) * 3];
 
-      // for (int j = 0; j < 2; j++)
-      {
-        float j = 0;
-        ray *primary = make_primary_ray(NULL, cam, x + j / 2.f, y + j / 2.f);
-        vec4 *color = make_vec4(NULL, (float[]){0, 0, 0, 1});
+      uint32_t pxl[] = {0, 0, 0};
 
-        scan_pixel(color, scene, primary);
+      for (int j = 0; j < j_max; ++j) {
+        for (int k = 0; k < k_max; ++k) {
+          ray *primary = make_primary_ray(NULL, cam, (float)x + (float)j / j_max,
+                                          (float)y + (float)k / k_max);
+          vec4 *color = make_vec4(NULL, (float[]){0, 0, 0, 1});
+
+          scan_pixel(color, scene, primary);
 
 #define CLAMP(x) ((x) < 0 ? 0 : (x) > 1 ? 1 : (x))
 
-        pix[0] += (uint8_t)(255 * CLAMP(((float *)color)[0])) ;
-        pix[1] += (uint8_t)(255 * CLAMP(((float *)color)[1])) ;
-        pix[2] += (uint8_t)(255 * CLAMP(((float *)color)[2])) ;
+          pxl[0] += (uint8_t)(255 * CLAMP(((float *)color)[0]));
+          pxl[1] += (uint8_t)(255 * CLAMP(((float *)color)[1]));
+          pxl[2] += (uint8_t)(255 * CLAMP(((float *)color)[2]));
+        }
       }
+      pix[0] = (uint8_t)(pxl[0] / n_samples);
+      pix[1] = (uint8_t)(pxl[1] / n_samples);
+      pix[2] = (uint8_t)(pxl[2] / n_samples);
     }
   }
 
