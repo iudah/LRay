@@ -1,9 +1,9 @@
----------PROJECT TITLE: LRAY-----------
+LRAY
 
 ------AUTHORS-------
-  IUDAH
-  JODEVER
-  SUPREME
+ - IUDAH
+ - JODEVER
+ - SUPREME
 
 --------DESCRIPTION--------------
 LRAY is a mini ray tracing program written to strengthen collaboration skills among the authors using git.
