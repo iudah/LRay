@@ -43,8 +43,8 @@
 #endif
 
 #elif defined(use_simd_float32)
-#include <arm_neon.h>
-// #include <neon2sse.h>
+//#include <arm_neon.h>
+#include <NEON_2_SSE.h>
 
 #define SIMD_STRIDE 4
 #define LOAD_SIMD vld1q_f32
@@ -96,7 +96,13 @@
 #ifndef use_float32
 #define __ai static __inline__ __attribute__((__always_inline__, __nodebug__))
 
-__ai __attribute__((target("neon"))) SIMD_type SIMD_divide(SIMD_type dividend,
+#ifdef __ARM_NEON__ 
+#define TARGET_NEON __attribute__((target("neon"))) 
+#else 
+#define TARGET_NEON
+#endif 
+
+__ai TARGET_NEON SIMD_type SIMD_divide(SIMD_type dividend,
                                                            SIMD_type divisor) {
   /*determine an initial estimate of reciprocal of divisor.*/
   auto initial_reciprocal = SIMD_initial_reciprocal(divisor);
@@ -115,7 +121,7 @@ __ai __attribute__((target("neon"))) SIMD_type SIMD_divide(SIMD_type dividend,
 #define float_type float
 #endif
 
-#ifndef use_float32
+#if !defined use_float32 && !(defined(__AVX__) || defined(__SSE__))
 
 __ai __attribute__((target("neon"))) float_type SIMD_sum(SIMD_type a) {
   auto sum = SIMD_add_x2(SIMD_get_high(a), SIMD_get_high(a));
