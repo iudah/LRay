@@ -1,5 +1,12 @@
 #ifndef VEC4_H
 #define VEC4_H
+#ifndef _Nonnull 
+#define _Nonnull
+#endif
+
+#ifndef _Nullable 
+#define _Nullable
+#endif
 
 #define EPSILON (1e-7f)
 
