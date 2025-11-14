@@ -95,10 +95,10 @@ include(headers.cmake)
 target_sources(lray PRIVATE ${SOURCE_FILES})
 
 target_include_directories(lray PUBLIC src/math src/renderer src/stb_image ${CMAKE_BINARY_DIR}/zot/include)
-target_link_libraries(lray PUBLIC memalloc::memalloc zot::zot memalloc_imported zot_imported)
+target_link_libraries(lray PUBLIC  zot::zot memalloc::memalloc )
 
 add_executable(lray_exe main.c)
-target_link_libraries(lray_exe PUBLIC memalloc::memalloc zot::zot memalloc_imported zot_imported lray)
+target_link_libraries(lray_exe PUBLIC zot::zot memalloc::memalloc lray )
 
 
 add_dependencies(lray_exe lray) 
