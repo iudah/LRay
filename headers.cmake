@@ -1,9 +1,9 @@
 set(HEADER_FILES
-    src/stb_image/stb_image_write.h
     src/renderer/ray.h
     src/renderer/scene.h
     src/renderer/object.h
     src/renderer/camera.h
-    src/math
     src/math/vec4.h
+    3rd-party/neon_2_sse/NEON_2_SSE.h
+    3rd-party/stb_image/stb_image_write.h
 )

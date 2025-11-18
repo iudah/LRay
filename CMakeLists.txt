@@ -14,27 +14,6 @@ include(GNUInstallDirs)
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/memalloc/${CMAKE_INSTALL_LIBDIR}/cmake/memalloc")
 
-
-find_package(NEON_2_SSE QUIET)
-if(NOT TARGET NEON_2_SSE::NEON_2_SSE)
-  message(STATUS "NEON_2_SSE not found, adding as ExternalProject")
-  ExternalProject_Add(
-    NEON_2_SSE
-    GIT_REPOSITORY "https://github.com/intel/ARM_NEON_2_x86_SSE.git"
-    GIT_TAG origin/master
-    GIT_SHALLOW TRUE
-    INSTALL_DIR ${CMAKE_BINARY_DIR}/NEON_2_SSE
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_EXECUTABLE=OFF
-    BUILD_ALWAYS OFF
-    STAMP_DIR ${CMAKE_BINARY_DIR}/stamps
-    UPDATE_DISCONNECTED TRUE
-  )
-
-  file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/NEON_2_SSE/include")
-
-endif()
-
-
 find_package(memalloc QUIET)
 add_library(memalloc_imported STATIC IMPORTED)
 if(NOT TARGET memalloc::memalloc)
@@ -94,14 +73,14 @@ include(sources.cmake)
 include(headers.cmake)
 target_sources(lray PRIVATE ${SOURCE_FILES})
 
-target_include_directories(lray PUBLIC src/math src/renderer src/stb_image ${CMAKE_BINARY_DIR}/zot/include)
-target_link_libraries(lray PUBLIC  zot::zot memalloc::memalloc )
+target_include_directories(lray PUBLIC 3rd-party/neon_2_sse src/math src/renderer 3rd-party/stb_image ${CMAKE_BINARY_DIR}/zot/include)
+target_link_libraries(lray PUBLIC zot::zot memalloc::memalloc)
 
 add_executable(lray_exe main.c)
-target_link_libraries(lray_exe PUBLIC zot::zot memalloc::memalloc lray )
+target_link_libraries(lray_exe PUBLIC zot::zot memalloc::memalloc lray)
 
 
-add_dependencies(lray_exe lray) 
+add_dependencies(lray_exe lray)
 
 
 install(TARGETS lray DESTINATION lib)
