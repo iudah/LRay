@@ -1,4 +1,5 @@
 #include "vec4.h"
+#include "vec4_shared.h"
 #include <math.h>
 #include <string.h>
 #include <zot.h>
@@ -10,7 +11,7 @@
 #endif
 
 #if defined __arm__ && defined __ARM_FP && !defined __LITTLE_ENDIAN__
-#error Sorry but I am trying to finish this project and currently only support little endian arm because that is what I use.
+#warning Sorry but I am trying to finish this project and currently only support little endian arm because that is what I use.
 #endif
 
 // Core math functionalities and utilities
@@ -43,7 +44,7 @@
 #endif
 
 #elif defined(use_simd_float32)
-//#include <arm_neon.h>
+// #include <arm_neon.h>
 #include <NEON_2_SSE.h>
 
 #define SIMD_STRIDE 4
@@ -96,14 +97,15 @@
 #ifndef use_float32
 #define __ai static __inline__ __attribute__((__always_inline__, __nodebug__))
 
-#ifdef __ARM_NEON__ 
-#define TARGET_NEON __attribute__((target("neon"))) 
-#else 
+#ifdef __ARM_NEON__
+#define TARGET_NEON __attribute__((target("neon")))
+#else
 #define TARGET_NEON
-#endif 
+#endif
 
 __ai TARGET_NEON SIMD_type SIMD_divide(SIMD_type dividend,
-                                                           SIMD_type divisor) {
+                                       SIMD_type divisor)
+{
   /*determine an initial estimate of reciprocal of divisor.*/
   auto initial_reciprocal = SIMD_initial_reciprocal(divisor);
   auto correction_factor = SIMD_correction_factor(divisor, initial_reciprocal);
@@ -123,26 +125,30 @@ __ai TARGET_NEON SIMD_type SIMD_divide(SIMD_type dividend,
 
 #if !defined use_float32 && !(defined(__AVX__) || defined(__SSE__))
 
-__ai __attribute__((target("neon"))) float_type SIMD_sum(SIMD_type a) {
+__ai __attribute__((target("neon"))) float_type SIMD_sum(SIMD_type a)
+{
   auto sum = SIMD_add_x2(SIMD_get_high(a), SIMD_get_high(a));
   sum = SIMD_padd_x2(sum, sum);
 
   return SIMD_get_lane(sum, 0);
 }
 
-__ai __attribute__((target("neon"))) float_type SIMD_reduce_min(SIMD_type a) {
+__ai __attribute__((target("neon"))) float_type SIMD_reduce_min(SIMD_type a)
+{
   auto min = SIMD_min_x2(SIMD_get_high(a), SIMD_get_high(a));
   min = SIMD_pmin_x2(min, min);
   return SIMD_get_lane(min, 0);
 }
 
-__ai __attribute__((target("neon"))) float_type SIMD_reduce_max(SIMD_type a) {
+__ai __attribute__((target("neon"))) float_type SIMD_reduce_max(SIMD_type a)
+{
   auto max = SIMD_max_x2(SIMD_get_high(a), SIMD_get_high(a));
   max = SIMD_pmin_x2(max, max);
   return SIMD_get_lane(max, 0);
 }
 
-__ai __attribute__((target("neon"))) SIMD_type SIMD_round(SIMD_type a) {
+__ai __attribute__((target("neon"))) SIMD_type SIMD_round(SIMD_type a)
+{
   // https://stackoverflow.com/a/69770515
   auto a_as_int = SIMD_float_to_int_with_shift(a, 1);
   auto arithmetic_shift_right =
@@ -151,12 +157,13 @@ __ai __attribute__((target("neon"))) SIMD_type SIMD_round(SIMD_type a) {
   return vcvtq_f32_s32(floor_round);
 }
 
-#define LN2_MUL_INV                                                            \
+#define LN2_MUL_INV \
   1.442695040888963407359924681001892137426645954152985934135449406931109219181185079885526622893506344f
-#define LN2                                                                    \
+#define LN2 \
   0.6931471805599453094172321214581765680755001343602552541206800094933936219696947156058633269964186875f
 
-__ai __attribute__((target("neon"))) SIMD_type SIMD_exp(SIMD_type a) {
+__ai __attribute__((target("neon"))) SIMD_type SIMD_exp(SIMD_type a)
+{
   auto a_over_ln2 = SIMD_multiply_by_scalar(a, LN2_MUL_INV);
 
   auto n = SIMD_round(a_over_ln2);
@@ -228,7 +235,8 @@ __ai __attribute__((target("neon"))) SIMD_type SIMD_exp(SIMD_type a) {
 #define SIMD_reduce_max vmaxvq_bf16
 
 __ai __attribute__((target("neon"))) SIMD_type simd_operate(
-    SIMD_type a, SIMD_type b, float32x4_t(operator)(float32x4_t, float32x4_t)) {
+    SIMD_type a, SIMD_type b, float32x4_t(operator)(float32x4_t, float32x4_t))
+{
   auto a_low = vcvtq_low_f32_bf16(a);
   auto a_high = vcvtq_high_f32_bf16(a);
 
@@ -242,43 +250,52 @@ __ai __attribute__((target("neon"))) SIMD_type simd_operate(
 }
 
 __ai __attribute__((target("neon"))) SIMD_type SIMD_add(SIMD_type a,
-                                                        SIMD_type b) {
+                                                        SIMD_type b)
+{
   return simd_operate(a, b, vaddq_f32);
 }
 __ai __attribute__((target("neon"))) SIMD_type SIMD_subtract(SIMD_type a,
-                                                             SIMD_type b) {
+                                                             SIMD_type b)
+{
   return simd_operate(a, b, vsubq_f32);
 }
 __ai __attribute__((target("neon"))) SIMD_type SIMD_multiply(SIMD_type a,
-                                                             SIMD_type b) {
+                                                             SIMD_type b)
+{
   return simd_operate(a, b, vmulq_f32);
 }
 __ai __attribute__((target("neon"))) SIMD_type SIMD_divide(SIMD_type a,
-                                                           SIMD_type b) {
+                                                           SIMD_type b)
+{
   return simd_operate(a, b, vdivq_f32);
 }
 __ai __attribute__((target("neon"))) SIMD_type SIMD_min(SIMD_type a,
-                                                        SIMD_type b) {
+                                                        SIMD_type b)
+{
   return simd_operate(a, b, vminq_f32);
 }
 __ai __attribute__((target("neon"))) SIMD_type SIMD_max(SIMD_type a,
-                                                        SIMD_type b) {
+                                                        SIMD_type b)
+{
   return simd_operate(a, b, vmaxq_f32);
 }
 
-__ai __attribute__((target("neon"))) zfl SIMD_sum(SIMD_type a) {
+__ai __attribute__((target("neon"))) zfl SIMD_sum(SIMD_type a)
+{
   auto a_low = vcvtq_low_f32_bf16(a);
   auto a_high = vcvtq_high_f32_bf16(a);
 
   return (zfl)(vaddvq_f32(a_low) + vaddvq_f32(a_high));
 }
-__ai __attribute__((target("neon"))) zfl SIMD_reduce_max(SIMD_type a) {
+__ai __attribute__((target("neon"))) zfl SIMD_reduce_max(SIMD_type a)
+{
   auto a_low = vcvtq_low_f32_bf16(a);
   auto a_high = vcvtq_high_f32_bf16(a);
 
   return (zfl)fmaxf(vmaxvq_f32(a_low), vmaxvq_f32(a_high));
 }
-__ai __attribute__((target("neon"))) zfl SIMD_reduce_min(SIMD_type a) {
+__ai __attribute__((target("neon"))) zfl SIMD_reduce_min(SIMD_type a)
+{
   auto a_low = vcvtq_low_f32_bf16(a);
   auto a_high = vcvtq_high_f32_bf16(a);
 
@@ -318,29 +335,31 @@ __ai __attribute__((target("neon"))) zfl SIMD_reduce_min(SIMD_type a) {
 
 #endif
 
-struct v4 {
-  float x, y, z, w;
-};
-
-struct m4 {
+struct m4
+{
   vec4 x, y, z, t;
 };
 
-vec4 *make_vec4(vec4 *vec, float *n) {
+vec4 *make_vec4(vec4 *vec, float *n)
+{
   vec4 *v = vec ? vec : zmalloc(sizeof *v);
-  if (n) {
+  if (n)
+  {
     v->x = n[0];
     v->y = n[1];
     v->z = n[2];
     v->w = n[3];
-  } else {
+  }
+  else
+  {
     memset(v, 0, sizeof(vec4));
   }
 
   return v;
 }
 
-vec4 *vadd(vec4 *vres, vec4 *va, vec4 *vb) {
+vec4 *vadd(vec4 *vres, vec4 *va, vec4 *vb)
+{
   vres = vres ? vres : zcalloc(1, sizeof(struct v4));
 
   void *v1 = va, *v2 = vb;
@@ -354,7 +373,8 @@ vec4 *vadd(vec4 *vres, vec4 *va, vec4 *vb) {
   return vres;
 }
 
-vec4 *vsub(vec4 *vres, vec4 *va, vec4 *vb) {
+vec4 *vsub(vec4 *vres, vec4 *va, vec4 *vb)
+{
   vres = vres ? vres : zcalloc(1, sizeof(struct v4));
 
   void *v1 = va, *v2 = vb;
@@ -368,7 +388,8 @@ vec4 *vsub(vec4 *vres, vec4 *va, vec4 *vb) {
   return vres;
 }
 
-vec4 *vmul(vec4 *vres, vec4 *va, vec4 *vb) {
+vec4 *vmul(vec4 *vres, vec4 *va, vec4 *vb)
+{
   vres = vres ? vres : zcalloc(1, sizeof(struct v4));
 
   void *v1 = va, *v2 = vb;
@@ -382,7 +403,8 @@ vec4 *vmul(vec4 *vres, vec4 *va, vec4 *vb) {
   return vres;
 }
 
-vec4 *vscale(vec4 *vres, float s, vec4 *vb) {
+vec4 *vscale(vec4 *vres, float s, vec4 *vb)
+{
   vres = vres ? vres : zcalloc(1, sizeof(struct v4));
 
   void *v2 = vb;
@@ -396,7 +418,8 @@ vec4 *vscale(vec4 *vres, float s, vec4 *vb) {
   return vres;
 }
 
-float vdot(float *fres, vec4 *va, vec4 *vb) {
+float vdot(float *fres, vec4 *va, vec4 *vb)
+{
   float f;
   fres = fres ? fres : &f;
 
@@ -412,7 +435,8 @@ float vdot(float *fres, vec4 *va, vec4 *vb) {
   //  vaddvq_f32(prod_result);
 }
 
-vec4 *vcross(vec4 *vres, vec4 *va, vec4 *vb) {
+vec4 *vcross(vec4 *vres, vec4 *va, vec4 *vb)
+{
   vres = vres ? vres : zcalloc(1, sizeof(struct v4));
 
   void *v1 = va, *v2 = vb;
@@ -446,7 +470,8 @@ vec4 *vcross(vec4 *vres, vec4 *va, vec4 *vb) {
   return vres;
 }
 
-float vmag(float *fres, vec4 *va) {
+float vmag(float *fres, vec4 *va)
+{
   float f;
   fres = fres ? fres : &f;
 
@@ -460,7 +485,8 @@ float vmag(float *fres, vec4 *va) {
   return *fres = sqrtf(sqr_f[0] + sqr_f[1] + sqr_f[2] + sqr_f[3]);
 }
 
-vec4 *vnorm(vec4 *vres, vec4 *va) {
+vec4 *vnorm(vec4 *vres, vec4 *va)
+{
   vres = vres ? vres : zcalloc(1, sizeof(struct v4));
 
   void *v = va;
@@ -475,12 +501,16 @@ vec4 *vnorm(vec4 *vres, vec4 *va) {
   return vres;
 }
 
-mat4 *make_mat4(mat4 *mres, float n[16]) {
+mat4 *make_mat4(mat4 *mres, float n[16])
+{
   mres = mres ? mres : zcalloc(1, sizeof *mres);
 
-  if (n) {
+  if (n)
+  {
     memcpy(mres, n, 16 * sizeof *n);
-  } else {
+  }
+  else
+  {
     mat4 m = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
 
     memcpy(mres, &m, sizeof m);
@@ -488,7 +518,8 @@ mat4 *make_mat4(mat4 *mres, float n[16]) {
   return mres;
 }
 
-vec4 *vmdot(vec4 *vres, vec4 *v, mat4 *m) {
+vec4 *vmdot(vec4 *vres, vec4 *v, mat4 *m)
+{
   vres = vres ? vres : zcalloc(1, sizeof(struct v4));
 
   auto res_x = SIMD_add(
@@ -501,7 +532,8 @@ vec4 *vmdot(vec4 *vres, vec4 *v, mat4 *m) {
   return vres;
 }
 
-vec4 *v3mdot(vec4 *vres, vec4 *v, mat4 *m) {
+vec4 *v3mdot(vec4 *vres, vec4 *v, mat4 *m)
+{
   float w = vres ? vres->w : 0;
 
   vres = vmdot(vres, v, m);
@@ -510,7 +542,8 @@ vec4 *v3mdot(vec4 *vres, vec4 *v, mat4 *m) {
   return vres;
 }
 
-vec4 *mv3dot(vec4 *vres, mat4 *m, vec4 *v) {
+vec4 *mv3dot(vec4 *vres, mat4 *m, vec4 *v)
+{
   vres = vres ? vres : zcalloc(1, sizeof(struct v4));
 
   vres->x = vdot(&vres->x, &m->x, v);
@@ -520,14 +553,16 @@ vec4 *mv3dot(vec4 *vres, mat4 *m, vec4 *v) {
   return vres;
 }
 
-vec4 *mvdot(vec4 *vres, mat4 *m, vec4 *v) {
+vec4 *mvdot(vec4 *vres, mat4 *m, vec4 *v)
+{
   vres = mv3dot(vres, m, v);
   vres->w = vdot(&vres->w, &m->t, v);
 
   return vres;
 }
 
-mat4 *mdot(mat4 *mres, mat4 *a, mat4 *b) {
+mat4 *mdot(mat4 *mres, mat4 *a, mat4 *b)
+{
   mres = mres ? mres : zcalloc(1, sizeof(struct m4));
 
   auto res_x = SIMD_add(
@@ -561,7 +596,8 @@ mat4 *mdot(mat4 *mres, mat4 *a, mat4 *b) {
   return mres;
 }
 
-mat4 *minv(mat4 *mres, mat4 *M) {
+mat4 *minv(mat4 *mres, mat4 *M)
+{
   mres = mres ? mres : zcalloc(1, sizeof(struct m4));
 
   float a = M->x.x, b = M->x.y, c = M->x.z, d = M->x.w; // row 1
@@ -604,7 +640,8 @@ mat4 *minv(mat4 *mres, mat4 *M) {
              g * (a * (-jp_ln) + b * (ip_lm) + d * (-in_jm)) +
              h * (a * (jo_kn) + b * (-io_km) + c * (in_jm)));
 
-  if (fabsf(D) < 1e-8) {
+  if (fabsf(D) < 1e-8)
+  {
     return NULL;
   }
 
@@ -633,7 +670,8 @@ mat4 *minv(mat4 *mres, mat4 *M) {
   return mres;
 }
 
-mat4 *mtranslate(mat4 *mres, float x, float y, float z) {
+mat4 *mtranslate(mat4 *mres, float x, float y, float z)
+{
   mres = mres ? mres : zcalloc(1, sizeof(struct m4));
 
   mres->t.x += x;
@@ -643,7 +681,8 @@ mat4 *mtranslate(mat4 *mres, float x, float y, float z) {
   return mres;
 }
 
-mat4 *mrotate_x(mat4 *mres, float angle) {
+mat4 *mrotate_x(mat4 *mres, float angle)
+{
   mres = mres ? mres : zcalloc(1, sizeof(struct m4));
 
   float a = angle * M_PI / 180.;
@@ -656,7 +695,8 @@ mat4 *mrotate_x(mat4 *mres, float angle) {
   return mdot(mres, mres, &rot);
 }
 
-mat4 *mrotate_y(mat4 *mres, float angle) {
+mat4 *mrotate_y(mat4 *mres, float angle)
+{
   mres = mres ? mres : zcalloc(1, sizeof(struct m4));
 
   float a = angle * M_PI / 180.;
@@ -669,7 +709,8 @@ mat4 *mrotate_y(mat4 *mres, float angle) {
   return mdot(mres, mres, &rot);
 }
 
-mat4 *mrotate_z(mat4 *mres, float angle) {
+mat4 *mrotate_z(mat4 *mres, float angle)
+{
   mres = mres ? mres : zcalloc(1, sizeof(struct m4));
 
   float a = angle * M_PI / 180.;
@@ -684,7 +725,8 @@ mat4 *mrotate_z(mat4 *mres, float angle) {
 
 bool compute_moller_trumbore_unknowns(vec4 *D, vec4 *AB, vec4 *AC, vec4 *AO,
                                       float *det, float *t, float *u,
-                                      float *v) {
+                                      float *v)
+{
 
   // # As at the time of wrtiting
   // #pip install sympy==1.14.0
